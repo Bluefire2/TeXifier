@@ -19,7 +19,7 @@ const test = process.argv[2] === 'test',
 
 const startDelim = 'latex$',
     endDelim = '$',
-    typesetColour = 'lightgray';
+    typesetColour = 'white';
 
 const typeset = (tex) => {
     return new Promise((resolve, reject) => {
@@ -55,13 +55,15 @@ client.login(loginToken).then(() => {
 });
 
 client.on('message', msg => {
-    if (msg.author === client.user) {
-        // make sure the bot doesn't respond to its own messages
+    if (msg.author === client.user || msg.author.bot) {
+        // make sure the bot doesn't respond to its own messages and bots
 
     } else if(msg.content.toLowerCase().startsWith('latex ')) {
         const tex = msg.content.slice(6);
         typeset(tex).then(image => {
             attachImage(msg.channel, image);
+        }).catch(err => {
+            msg.channel.send(err);
         });
     } else {
         const texStrings = msg.content.split(startDelim);
@@ -82,6 +84,8 @@ client.on('message', msg => {
                         if(++i === amt) {
                             resolve();
                         }
+                    }).catch(err => {
+                        msg.channel.send(err);
                     });
                 });
             }).then(() => {
