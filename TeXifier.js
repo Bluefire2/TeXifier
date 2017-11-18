@@ -37,7 +37,7 @@ client.on('message', msg => {
                         rawTex = elem.slice(0, end);
 
                     const options = {
-                        math: `\\color{${typesetColour}{${rawTex}}`, //add colour
+                        math: `\\color{${typesetColour}}{${rawTex}}`, //add colour
                         format: 'TeX',
                         png: true
                     };
