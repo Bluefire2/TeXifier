@@ -14,8 +14,8 @@ const Promise = require('bluebird');
 const config = require('./config.json');
 
 // If the command line argument 'test' is given, log in to the test account
-const test = process.argv[2] === 'test';
-const loginToken = test ? config.test_token : config.token;
+const test = process.argv[2] === 'test',
+    loginToken = test ? config.test_token : config.token;
 
 const startDelim = 'latex$',
     endDelim = '$',
@@ -58,7 +58,7 @@ client.on('message', msg => {
     if (msg.author === client.user) {
         // make sure the bot doesn't respond to its own messages
 
-    } else if(msg.content.startsWith('latex ')) {
+    } else if(msg.content.toLowerCase().startsWith('latex ')) {
         const tex = msg.content.slice(6);
         typeset(tex).then(image => {
             attachImage(msg.channel, image);
