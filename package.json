@@ -1,0 +1,17 @@
+{
+  "name": "texifier",
+  "version": "1.0.0",
+  "description": "TeX bot",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Bluefire2",
+  "license": "MIT",
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "discord.js": "^11.2.1",
+    "mathjax-node": "^1.2.1",
+    "mathjax-node-svg2png": "^1.1.0"
+  }
+}
