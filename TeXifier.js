@@ -50,9 +50,7 @@ client.on('message', msg => {
                     mjAPI.start();
 
                     mjAPI.typeset(options, result => {
-                        console.log(result.png.indexOf('data:image/png;base64'), 0, 'PNG data-uri header');
-                        console.log(result.png.length > 100, 'PNG data length');
-                        console.log(result.png);
+                        // console.log(result.png);
 
                         const pngString = result.png.replace(/^data:image\/png;base64,/, ""),
                             image = Buffer.from(pngString, 'base64');
