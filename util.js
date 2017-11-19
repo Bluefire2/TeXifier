@@ -48,7 +48,6 @@ module.exports.typeset = (tex) => {
  */
 module.exports.attachImages = (channel, images, message = false) => {
     const files = images.map((elem, index) => new Attachment(elem, `file${index}.png`));
-    console.log(files);
     if(!message) {
         channel.send({files: files});
     } else {
