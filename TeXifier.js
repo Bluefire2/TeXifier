@@ -1,16 +1,8 @@
-const mjAPI = require("mathjax-node-svg2png");
-mjAPI.config({
-    MathJax: {
-        // traditional MathJax configuration
-    }
-});
-mjAPI.start();
-
 const Discord = require('discord.js');
-const Attachment = Discord.Attachment;
 const client = new Discord.Client();
 const Promise = require('bluebird');
 
+const util = require('./util');
 const config = require('./config.json');
 
 // If the command line argument 'test' is given, log in to the test account
@@ -18,33 +10,7 @@ const test = process.argv[2] === 'test',
     loginToken = test ? config.test_token : config.token;
 
 const startDelim = 'latex$',
-    endDelim = '$',
-    typesetColour = 'white';
-
-const typeset = (tex) => {
-    return new Promise((resolve, reject) => {
-        const options = {
-            math: `\\color{${typesetColour}}{${tex}}`, //add colour
-            format: 'TeX',
-            png: true
-        };
-
-        mjAPI.typeset(options, result => {
-            if (!result.errors) {
-                const pngString = result.png.replace(/^data:image\/png;base64,/, ""),
-                    image = Buffer.from(pngString, 'base64');
-
-                resolve(image);
-            } else {
-                reject(result.errors);
-            }
-        });
-    });
-};
-
-const attachImage = (channel, image) => {
-    channel.send({files: [new Attachment(image, 'file.png')]});
-};
+    endDelim = '$';
 
 client.on('ready', () => {
     console.log('Hello world!');
@@ -60,8 +26,8 @@ client.on('message', msg => {
 
     } else if(msg.content.toLowerCase().startsWith('latex ')) {
         const tex = msg.content.slice(6);
-        typeset(tex).then(image => {
-            attachImage(msg.channel, image);
+        util.typeset(tex).then(image => {
+            util.attachImage(msg.channel, image);
         }).catch(err => {
             msg.channel.send(err);
         });
@@ -79,7 +45,7 @@ client.on('message', msg => {
                     const end = elem.indexOf(endDelim),
                         tex = elem.slice(0, end);
 
-                    typeset(tex).then(image => {
+                    util.typeset(tex).then(image => {
                         images.push(image);
                         if(++i === amt) {
                             resolve();
@@ -89,11 +55,7 @@ client.on('message', msg => {
                     });
                 });
             }).then(() => {
-                msg.channel.send('LaTeX detected:');
-
-                images.forEach(image => {
-                    attachImage(msg.channel, image);
-                });
+                util.attachImages(msg.channel, images, 'LaTeX detected:');
             });
         }
     }
