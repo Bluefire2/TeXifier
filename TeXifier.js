@@ -36,26 +36,17 @@ client.on('message', msg => {
 
         if(texStrings.length !== 1) {
             texStrings.shift();
-            let i = 0;
-            const images = [],
-                amt = texStrings.length;
 
-            new Promise((resolve, reject) => {
-                texStrings.map(elem => {
-                    const end = elem.indexOf(endDelim),
-                        tex = elem.slice(0, end);
+            const promises = texStrings.map(elem => {
+                const end = elem.indexOf(endDelim),
+                    tex = elem.slice(0, end);
+                return util.typeset(tex);
+            });
 
-                    util.typeset(tex).then(image => {
-                        images.push(image);
-                        if(++i === amt) {
-                            resolve();
-                        }
-                    }).catch(err => {
-                        msg.channel.send(err);
-                    });
-                });
-            }).then(() => {
+            Promise.all(promises).then((images) => {
                 util.attachImages(msg.channel, images, 'LaTeX detected:');
+            }).catch(err => {
+                msg.channel.send(err);
             });
         }
     }
