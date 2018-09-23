@@ -9,8 +9,8 @@ mjAPI.config({
 });
 mjAPI.start();
 
-// The colour to typeset in; white looks best in Discord imo.
-const typesetColour = 'white';
+// The colour to typeset in; gray works in both light and dark mode.
+const typesetColour = 'gray';
 
 /**
  * Typesets LaTeX using MathJax, into a base64-encoded PNG.
