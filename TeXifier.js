@@ -24,7 +24,7 @@ client.on('message', msg => {
     if (msg.author === client.user || msg.author.bot) {
         // make sure the bot doesn't respond to its own messages and bots
 
-    } else if(msg.content.toLowerCase().startsWith('latex ')) {
+    } else if (msg.content.toLowerCase().startsWith('latex ')) {
         const tex = msg.content.slice(6);
         util.typeset(tex).then(image => {
             util.attachImage(msg.channel, image);
@@ -34,7 +34,7 @@ client.on('message', msg => {
     } else {
         const texStrings = msg.content.split(startDelim);
 
-        if(texStrings.length !== 1) {
+        if (texStrings.length !== 1) {
             texStrings.shift();
 
             const promises = texStrings.map(elem => {
