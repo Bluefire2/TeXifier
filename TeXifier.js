@@ -1,5 +1,11 @@
-const Discord = require('discord.js');
-const client = new Discord.Client();
+const { Client, GatewayIntentBits } = require('discord.js');
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent
+    ]
+});
 const Promise = require('bluebird');
 
 const util = require('./util');
@@ -12,7 +18,7 @@ const test = process.argv[2] === 'test',
 const startDelim = 'latex$',
     endDelim = '$';
 
-client.on('ready', () => {
+client.on('clientReady', () => {
     console.log('Hello world!');
 });
 
@@ -20,7 +26,7 @@ client.login(loginToken).then(() => {
 
 });
 
-client.on('message', msg => {
+client.on('messageCreate', msg => {
     if (msg.author === client.user || msg.author.bot) {
         // make sure the bot doesn't respond to its own messages and bots
 

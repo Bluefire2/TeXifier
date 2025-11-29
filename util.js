@@ -1,13 +1,25 @@
-const Discord = require('discord.js');
-const Attachment = Discord.Attachment;
-const mjAPI = require("mathjax-node-svg2png");
+const { AttachmentBuilder } = require('discord.js');
 
-mjAPI.config({
-    MathJax: {
-        // traditional MathJax configuration
-    }
+// MathJax (mathjax-full) setup (render TeX -> SVG)
+const { mathjax } = require('mathjax-full/js/mathjax.js');
+const { TeX } = require('mathjax-full/js/input/tex.js');
+const { SVG } = require('mathjax-full/js/output/svg.js');
+const { liteAdaptor } = require('mathjax-full/js/adaptors/liteAdaptor.js');
+const { RegisterHTMLHandler } = require('mathjax-full/js/handlers/html.js');
+const { AllPackages } = require('mathjax-full/js/input/tex/AllPackages.js');
+
+// For converting SVG output from MathJax into PNG
+const sharp = require('sharp');
+
+// Set up a lite adaptor and MathJax document once at startup
+const adaptor = liteAdaptor();
+RegisterHTMLHandler(adaptor);
+
+const texInput = new TeX({
+    packages: AllPackages
 });
-mjAPI.start();
+const svgOutput = new SVG({ fontCache: 'none' });
+const html = mathjax.document('', { InputJax: texInput, OutputJax: svgOutput });
 
 // The colour to typeset in; gray works in both light and dark mode.
 const typesetColour = 'gray';
@@ -19,24 +31,22 @@ const typesetColour = 'gray';
  * @return {Promise} A promise that resolves with the typeset PNG, or rejects with an error if there is one.
  */
 module.exports.typeset = (tex) => {
-    return new Promise((resolve, reject) => {
-        const options = {
-            math: `\\color{${typesetColour}}{${tex}}`, //add colour
-            format: 'TeX',
-            png: true
-        };
+    const math = `\\color{${typesetColour}}{${tex}}`;
 
-        mjAPI.typeset(options, result => {
-            if (!result.errors) {
-                const pngString = result.png.replace(/^data:image\/png;base64,/, ""),
-                    image = Buffer.from(pngString, 'base64');
+    return (async () => {
+        // Convert TeX -> SVG using MathJax
+        const node = html.convert(math, { display: true });
+        // Extract just the <svg> element; sharp expects an SVG root
+        const svgNode = adaptor.firstChild(node);
+        const svgString = adaptor.outerHTML(svgNode);
 
-                resolve(image);
-            } else {
-                reject(result.errors);
-            }
-        });
-    });
+        // Convert SVG -> PNG buffer
+        const image = await sharp(Buffer.from(svgString))
+            .png()
+            .toBuffer();
+
+        return image;
+    })();
 };
 
 /**
@@ -47,11 +57,11 @@ module.exports.typeset = (tex) => {
  * @param message The message to send, optional.
  */
 module.exports.attachImages = (channel, images, message = false) => {
-    const files = images.map((elem, index) => new Attachment(elem, `file${index}.png`));
+    const files = images.map((elem, index) => new AttachmentBuilder(elem, { name: `file${index}.png` }));
     if (!message) {
-        channel.send({files: files});
+        channel.send({ files });
     } else {
-        channel.send(message, {files: files});
+        channel.send({ content: message, files });
     }
 };
 
